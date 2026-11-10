@@ -51,7 +51,10 @@ export async function fetchCustomBackendCarparks(url: string): Promise<Carpark[]
     },
   });
   if (!response.ok) {
-    throw new Error(`Custom backend returned status ${response.status}: ${response.statusText}`);
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(
+      errorBody.error || `Serverless endpoint returned status ${response.status}: ${response.statusText}`
+    );
   }
   const data = await response.json();
   if (Array.isArray(data)) {
@@ -60,7 +63,41 @@ export async function fetchCustomBackendCarparks(url: string): Promise<Carpark[]
   if (data && Array.isArray(data.carparks)) {
     return data.carparks as Carpark[];
   }
-  throw new Error('Unrecognized response format: expected an array of carparks or { carparks: [...] }');
+  if (data && Array.isArray(data.value)) {
+    // Convert LTA DataMall CarParkAvailabilityv2 records to Carpark items
+    return data.value.map((rec: any, idx: number) => {
+      const coords = rec.Location?.split(' ') || ['1.3521', '103.8198'];
+      const lat = parseFloat(coords[0]) || 1.3521;
+      const lng = parseFloat(coords[1]) || 103.8198;
+      const available = typeof rec.AvailableLots === 'number' ? rec.AvailableLots : parseInt(rec.AvailableLots, 10) || 0;
+      const total = Math.max(available, 100);
+
+      return {
+        id: rec.CarParkID || `LTA-${idx}`,
+        name: rec.Development || `Carpark ${rec.CarParkID}`,
+        address: rec.Area ? `${rec.Area}, Singapore` : 'Singapore',
+        area: rec.Area || 'Central',
+        agency: rec.Agency || 'LTA',
+        carparkType: 'Multi-Storey',
+        coordinates: { lat, lng },
+        lots: {
+          cars: { available, total },
+        },
+        parkingSystem: 'Electronic Parking System (EPS)',
+        rates: {
+          weekdayPeak: '$1.20 / 30 mins',
+          weekdayOffpeak: '$0.60 / 30 mins',
+          gracePeriodMins: 10,
+          perHalfHourCents: 120,
+        },
+        hasFreeParkingScheme: rec.Agency === 'HDB',
+        hasEVCharging: false,
+        lastUpdated: 'Just now (LTA DataMall)',
+        historyTrend: [available, available, available, available, available, available],
+      } as Carpark;
+    });
+  }
+  throw new Error('Unrecognized response format: expected an array of carparks, { carparks: [...] }, or LTA { value: [...] }');
 }
 
 // Distance calculation using Haversine formula

@@ -174,7 +174,7 @@ export const BackendConnectorModal: React.FC<BackendConnectorModalProps> = ({
                     </p>
                   </div>
 
-                  {/* Option 3: Custom Backend */}
+              {/* Option 3: Custom Backend / Serverless */}
                   <div
                     onClick={() => onUpdateConfig({ sourceType: 'custom' })}
                     className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
@@ -184,7 +184,7 @@ export const BackendConnectorModal: React.FC<BackendConnectorModalProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-slate-900">Custom Backend URL</span>
+                      <span className="text-xs font-bold text-slate-900">Serverless /api Endpoints</span>
                       <Radio
                         className={`w-4 h-4 ${
                           config.sourceType === 'custom'
@@ -194,7 +194,7 @@ export const BackendConnectorModal: React.FC<BackendConnectorModalProps> = ({
                       />
                     </div>
                     <p className="text-[11px] text-slate-500">
-                      Connect to your own Node/Express backend or LTA DataMall proxy.
+                      Live /api/carparkavailability serverless function (LTA AccountKey proxy).
                     </p>
                   </div>
                 </div>
@@ -202,16 +202,34 @@ export const BackendConnectorModal: React.FC<BackendConnectorModalProps> = ({
 
               {/* Custom URL Input if Custom is Selected */}
               {config.sourceType === 'custom' && (
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                  <label className="text-xs font-semibold text-slate-700 block">
-                    Custom Backend Endpoint URL:
-                  </label>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-700 block">
+                      Serverless Endpoint URL:
+                    </label>
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => onUpdateConfig({ customUrl: '/api/carparkavailability' })}
+                        className="px-2 py-0.5 rounded bg-white border border-slate-200 text-blue-600 hover:bg-slate-50 font-mono"
+                      >
+                        /api/carparkavailability
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onUpdateConfig({ customUrl: '/api/health' })}
+                        className="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-mono"
+                      >
+                        /api/health
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <input
-                      type="url"
+                      type="text"
                       value={config.customUrl}
                       onChange={(e) => onUpdateConfig({ customUrl: e.target.value })}
-                      placeholder="http://localhost:3000/api/carparks or https://my-service.run.app/api/carparks"
+                      placeholder="/api/carparkavailability"
                       className="flex-1 py-2 px-3 bg-white border border-slate-200 rounded-lg text-xs font-mono text-slate-900 focus:outline-hidden focus:border-blue-500"
                     />
                     <button
@@ -221,12 +239,36 @@ export const BackendConnectorModal: React.FC<BackendConnectorModalProps> = ({
                       className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1.5 shrink-0 transition-colors"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
-                      <span>{isTesting ? 'Testing...' : 'Test Connection'}</span>
+                      <span>{isTesting ? 'Testing...' : 'Test Endpoint'}</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-400">
-                    Endpoint should return JSON array conforming to the Carpark interface schema.
-                  </p>
+
+                  {/* Serverless Endpoints Catalog Quick Links */}
+                  <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-600 space-y-1">
+                    <span className="font-semibold text-slate-700">Available Serverless Endpoints:</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-mono text-[10px]">
+                      <a href="/api/health" target="_blank" className="p-1.5 bg-white rounded border border-slate-200 text-blue-600 hover:underline flex items-center justify-between">
+                        <span>/api/health</span>
+                        <span className="text-slate-400 font-sans">System Status ↗</span>
+                      </a>
+                      <a href="/api/carparkavailability" target="_blank" className="p-1.5 bg-white rounded border border-slate-200 text-blue-600 hover:underline flex items-center justify-between">
+                        <span>/api/carparkavailability</span>
+                        <span className="text-slate-400 font-sans">Live Lots ↗</span>
+                      </a>
+                      <a href="/api/busarrival?BusStopCode=83139&ServiceNo=15" target="_blank" className="p-1.5 bg-white rounded border border-slate-200 text-blue-600 hover:underline flex items-center justify-between">
+                        <span>/api/busarrival (v3)</span>
+                        <span className="text-slate-400 font-sans">Next Buses ↗</span>
+                      </a>
+                      <a href="/api/trafficincidents" target="_blank" className="p-1.5 bg-white rounded border border-slate-200 text-blue-600 hover:underline flex items-center justify-between">
+                        <span>/api/trafficincidents</span>
+                        <span className="text-slate-400 font-sans">Incidents ↗</span>
+                      </a>
+                      <a href="/api/trainalerts" target="_blank" className="p-1.5 bg-white rounded border border-slate-200 text-blue-600 hover:underline flex items-center justify-between">
+                        <span>/api/trainalerts</span>
+                        <span className="text-slate-400 font-sans">Train Status ↗</span>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               )}
 
